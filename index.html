@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقييم قواعد اللغة الإنجليزية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg-color: rgba(22, 27, 34, 0.7);
+            --border-color: rgba(139, 148, 158, 0.2);
+            --primary-glow: 0 0 15px rgba(37, 99, 235, 0.3), 0 0 5px rgba(37, 99, 235, 0.5);
+            --primary-color: #3b82f6; /* Blue-500 */
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            background-image: radial-gradient(circle at 1px 1px, rgba(139, 148, 158, 0.1) 1px, transparent 0);
+            background-size: 2rem 2rem;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+        .screen {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden-screen {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+        }
+        .visible-screen {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        .primary-btn {
+            background-color: var(--primary-color);
+            box-shadow: var(--primary-glow);
+            transition: all 0.2s ease-in-out;
+        }
+        .primary-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.5), 0 0 10px rgba(37, 99, 235, 0.7);
+        }
+        .option-btn {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .option-btn.correct {
+            background-color: #10b981 !important; /* Emerald-500 */
+            border-color: #10b981 !important;
+            color: white !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important; /* Red-500 */
+            border-color: #ef4444 !important;
+            color: white !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            box-shadow: var(--primary-glow);
+            transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .leaderboard-rank svg {
+            width: 28px;
+            height: 28px;
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-out;
+            background-color: rgba(16, 185, 129, 0.1);
+            border-right: 4px solid #10b981;
+            border-radius: 0.5rem;
+        }
+        .explanation.show {
+            max-height: 500px;
+            margin-top: 1.5rem;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="w-full p-4">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold text-center">Mr Ahmed Ibrahim</h1>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 w-full">
+        <div class="w-full max-w-5xl mx-auto">
+            
+            <!-- Name Entry Screen -->
+            <div id="name-container" class="screen visible-screen card p-8 md:p-12 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">تقييم قواعد اللغة الإنجليزية</h2>
+                <p class="text-slate-400 mb-8 max-w-md mx-auto">أدخل اسمك الكامل لبدء التقييم.</p>
+                <input type="text" id="name-input" placeholder="مثال: أحمد محمد" class="w-full max-w-sm mx-auto p-3 rounded-lg border-2 bg-transparent border-[#30363d] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-6 text-center">
+                <button id="start-quiz-btn" class="primary-btn text-white font-bold py-3 px-10 rounded-full w-full max-w-sm mx-auto">ابدأ التقييم</button>
+                <p id="name-error" class="text-red-500 mt-4 h-5"></p>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-container" class="screen hidden-screen card p-6 sm:p-8">
+                <div id="quiz-header" class="mb-6">
+                    <h2 id="group-title" class="text-2xl font-bold text-white text-center mb-2"></h2>
+                    <p id="group-description" class="text-slate-400 text-center mb-4"></p>
+                    <div class="w-full bg-[#30363d] rounded-full h-2.5">
+                        <div id="progress-bar" class="progress-bar h-2.5 rounded-full"></div>
+                    </div>
+                    <p id="progress-text" class="text-sm font-semibold text-slate-400 mt-2 text-center"></p>
+                </div>
+
+                <div id="question-area">
+                    <p id="question-text" class="text-xl md:text-2xl font-semibold mb-8 min-h-[60px] text-white text-center"></p>
+                    <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+                <div id="explanation-box" class="explanation">
+                    <p id="explanation-text" class="text-sm text-emerald-200"></p>
+                </div>
+                <div class="mt-8 text-left">
+                    <button id="next-btn" class="primary-btn text-white font-bold py-3 px-8 rounded-full transition-all duration-300 opacity-0 invisible">السؤال التالي</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="results-container" class="screen hidden-screen">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Right Column: Score & Details (RTL) -->
+                    <div class="lg:col-span-1 card p-8 text-center flex flex-col justify-center">
+                        <h2 class="text-3xl font-bold text-white mb-2">اكتمل التقييم!</h2>
+                        <p id="results-name" class="text-lg text-slate-400 mb-6"></p>
+                        <p class="text-lg mb-2 text-slate-300">نتيجتك النهائية:</p>
+                        <p id="score-text" class="text-7xl font-bold mb-4"></p>
+                        <div id="score-message" class="text-md mb-6"></div>
+                        <div id="email-status" class="my-4 h-6 text-sm"></div>
+                    </div>
+                    <!-- Left Column: Leaderboard (RTL) -->
+                    <div class="lg:col-span-2 card p-8">
+                        <h3 class="text-2xl font-bold text-white mb-6 text-center">لوحة الأوائل</h3>
+                        <div class="overflow-y-auto max-h-[400px]">
+                            <table id="leaderboard-table" class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[#30363d]">
+                                        <th class="p-3 font-semibold text-right text-slate-400">الترتيب</th>
+                                        <th class="p-3 font-semibold text-right text-slate-400">الاسم</th>
+                                        <th class="p-3 font-semibold text-left text-slate-400">النتيجة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Leaderboard rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center p-6 text-sm text-slate-500 w-full">
+        powered by (#BroUnion)
+    </footer>
+
+    <script>
+        const quizData = [
+            {
+                groupTitle: "المجموعة الأولى: الجملة المثبتة والمنفية",
+                groupDescription: "التركيز على تكوين الجملة في المضارع البسيط (s/es) والنفي (don't/doesn't).",
+                questions: [
+                    { question: "My brother sometimes ______ fish for lunch.", options: ["eat", "eats", "eating", "are eating"], answer: "eats", explanation: "الفاعل (My brother) مفرد غائب، لذلك نضيف (s) للفعل في زمن المضارع البسيط." },
+                    { question: "We ______ to the club on Fridays; we prefer to stay at home.", options: ["don't go", "doesn't go", "never goes", "aren't go"], answer: "don't go", explanation: "الفاعل (We) جمع، لذلك نستخدم (don't) للنفي ويأتي بعده الفعل في المصدر." },
+                    { question: "The sun ______ in the east.", options: ["rise", "is rising", "rises", "has risen"], answer: "rises", explanation: "هذه حقيقة علمية ثابتة، لذلك نستخدم زمن المضارع البسيط. الفاعل (The sun) مفرد، فنضيف (s) للفعل." },
+                    { question: "My little sister ______ vegetables at all. She hates them.", options: ["don't like", "never like", "doesn't like", "isn't like"], answer: "doesn't like", explanation: "الفاعل (My little sister) مفرد غائب، لذلك نستخدم (doesn't) للنفي ويأتي بعدها الفعل في المصدر." },
+                    { question: "He never ______ lies; he is a very honest person.", options: ["tell", "tells", "don't tell", "doesn't tell"], answer: "tells", explanation: "كلمة (never) تفيد النفي ولكن الفعل الذي يأتي بعدها يُعامل كأنه في جملة مثبتة. بما أن الفاعل (He) مفرد، نضيف (s) للفعل." },
+                    { question: "Birds ______ their nests in trees.", options: ["build", "builds", "is building", "are build"], answer: "build", explanation: "الفاعل (Birds) جمع، لذلك يأتي الفعل في المصدر بدون أي إضافات." },
+                    { question: "A good student ______ his homework regularly.", options: ["do", "is doing", "does", "don't do"], answer: "does", explanation: "الفاعل (A good student) مفرد، والفعل (do) ينتهي بـ (o) لذلك نضيف (es) ليصبح (does)." }
+                ]
+            },
+            {
+                groupTitle: "المجموعة الثانية: السؤال والمبني للمجهول",
+                groupDescription: "التركيز على تكوين السؤال (Do/Does) والمبني للمجهول (am/is/are + P.P).",
+                questions: [
+                    { question: "______ you speak French fluently?", options: ["Is", "Are", "Do", "Does"], answer: "Do", explanation: "نستخدم (Do) لتكوين السؤال مع الفاعل (you)، ويأتي بعده الفعل في المصدر." },
+                    { question: "Where ______ your father work?", options: ["do", "is", "are", "does"], answer: "does", explanation: "الفاعل (your father) مفرد غائب، لذلك نستخدم (Does) لتكوين السؤال." },
+                    { question: "English ______ all over the world.", options: ["speaks", "is spoken", "speak", "are spoken"], answer: "is spoken", explanation: "الجملة مبنية للمجهول لأن (English) مفعول به. نستخدم (is) لأن المفعول مفرد، ثم التصريف الثالث للفعل (spoken)." },
+                    { question: "______ she help her mother in the kitchen?", options: ["Do", "Is", "Does", "Are"], answer: "Does", explanation: "نستخدم (Does) لتكوين السؤال مع الفاعل المفرد الغائب (she)." },
+                    { question: "Many emails ______ by our company every day.", options: ["send", "is sent", "are sent", "sends"], answer: "are sent", explanation: "الجملة مبنية للمجهول والمفعول به (Many emails) جمع، لذلك نستخدم (are) ثم التصريف الثالث للفعل (sent)." },
+                    { question: "What time ______ the match start?", options: ["do", "does", "is", "are"], answer: "does", explanation: "الفاعل (the match) مفرد، لذلك نستخدم (does) في السؤال." },
+                    { question: "This newspaper ______ by millions of people.", options: ["reads", "is read", "are read", "read"], answer: "is read", explanation: "الجملة مبنية للمجهول والمفعول به (This newspaper) مفرد، لذلك نستخدم (is) ثم التصريف الثالث للفعل (read)." }
+                ]
+            },
+            {
+                groupTitle: "المجموعة الثالثة: ظروف التكرار",
+                groupDescription: "التركيز على المكان الصحيح لظروف التكرار والتعبيرات الزمنية.",
+                questions: [
+                    { question: "He is ______ late for his appointments.", options: ["never", "late never", "never is", "is never late"], answer: "never", explanation: "ظروف التكرار تأتي بعد (am/is/are). الصيغة الصحيحة هي (He is never late)." },
+                    { question: "She visits her grandparents ______ a month.", options: ["one", "once", "two", "every"], answer: "once", explanation: "نستخدم (once) بمعنى 'مرة واحدة'." },
+                    { question: "I ______ my teeth before I go to bed.", options: ["brush always", "always brush", "am always brush", "brush sometimes"], answer: "always brush", explanation: "ظروف التكرار تأتي قبل الفعل الأساسي في الجملة." },
+                    { question: "They go to the cinema ______.", options: ["from time to time", "hardly", "oftenly", "ever"], answer: "from time to time", explanation: "التعبيرات الزمنية مثل (from time to time) تأتي عادة في نهاية الجملة." },
+                    { question: "My manager is ______ busy, so it's difficult to talk to him.", options: ["usually", "usual", "as usual", "usualy"], answer: "usually", explanation: "ظرف التكرار (usually) يأتي بعد (is)." },
+                    { question: "How ______ do you exercise? - Three times a week.", options: ["many", "much", "long", "often"], answer: "often", explanation: "نستخدم (How often) للسؤال عن عدد مرات تكرار الفعل." },
+                    { question: "He ______ eats fast food because it's unhealthy.", options: ["always", "often", "rarely", "usually"], answer: "rarely", explanation: "معنى الجملة 'هو نادراً ما يأكل' يتناسب مع السبب المذكور 'لأنه غير صحي'." }
+                ]
+            },
+            {
+                groupTitle: "المجموعة الرابعة: التعبير عن العادة بـ (be/get used to)",
+                groupDescription: "التركيز على استخدام (Subject + be/get + used to + v-ing/noun).",
+                questions: [
+                    { question: "He isn't used to ______ in a cold country.", options: ["live", "living", "lived", "lives"], answer: "living", explanation: "بعد التعبير (be used to) يأتي الفعل مضافاً له (ing)." },
+                    { question: "It was difficult at first, but now I am getting used to ______ early.", options: ["wake up", "waking up", "woke up", "wake"], answer: "waking up", explanation: "بعد التعبير (get used to) يأتي الفعل مضافاً له (ing)." },
+                    { question: "She will soon get used to the ______ in the city.", options: ["noisy", "noise", "noised", "noisily"], answer: "noise", explanation: "بعد التعبير (get used to) يمكن أن يأتي اسم (noun) مثل (the noise)." },
+                    { question: "My grandfather isn't used to ______ modern technology.", options: ["use", "used", "using", "useful"], answer: "using", explanation: "بعد (be used to) نستخدم الفعل مضافاً له (ing)." },
+                    { question: "After a year in London, she is used to ______ on the left.", options: ["drive", "drove", "driven", "driving"], answer: "driving", explanation: "بعد (is used to) نستخدم الفعل مضافاً له (ing)." },
+                    { question: "Don't worry, you will ______ the new system.", options: ["get used to", "are used to", "used to", "getting used to"], answer: "get used to", explanation: "بعد (will) يأتي الفعل في المصدر، لذلك نستخدم (get used to)." },
+                    { question: "I ______ living in a big city, so the traffic doesn't bother me.", options: ["use to", "am used to", "get used", "used"], answer: "am used to", explanation: "التعبير (am used to) يعني 'أنا معتاد على'، وهو ما يناسب معنى الجملة." }
+                ]
+            },
+            {
+                groupTitle: "المجموعة الخامسة: طرق بديلة للتعبير عن العادة",
+                groupDescription: "التركيز على تراكيب مثل (in the habit of + v-ing) و (It is my habit to + inf).",
+                questions: [
+                    { question: "She is in the habit of ______ a story to her children every night.", options: ["read", "reading", "reads", "to read"], answer: "reading", explanation: "بعد التعبير (in the habit of) يأتي الفعل مضافاً له (ing)." },
+                    { question: "It is his ______ to drink coffee every morning.", options: ["habit", "hobby", "custom", "habitual"], answer: "habit", explanation: "التركيب هو (It is his habit to + infinitive)." },
+                    { question: "He has the habit of ______ his keys.", options: ["lose", "to lose", "losing", "lost"], answer: "losing", explanation: "بعد التعبير (the habit of) يأتي الفعل مضافاً له (ing)." },
+                    { question: "It is my habit ______ for a walk after dinner.", options: ["go", "going", "to go", "went"], answer: "to go", explanation: "بعد التعبير (It is my habit) نستخدم (to + infinitive)." },
+                    { question: "My father is in the ______ of reading the newspaper every day.", options: ["habit", "hobby", "custom", "action"], answer: "habit", explanation: "التركيب هو (be in the habit of)." },
+                    { question: "I have the habit of ______ to music while I study.", options: ["listen", "to listen", "listened", "listening"], answer: "listening", explanation: "بعد (the habit of) يأتي الفعل مضافاً له (ing)." },
+                    { question: "It is a bad ______ to bite your nails.", options: ["habit of", "habit", "habit to", "habit for"], answer: "habit", explanation: "التركيب هو (It is a bad habit to + infinitive)." }
+                ]
+            }
+        ];
+
+        // DOM Elements
+        const groupTitleEl = document.getElementById('group-title');
+        const groupDescriptionEl = document.getElementById('group-description');
+        const nameContainer = document.getElementById('name-container');
+        const nameInput = document.getElementById('name-input');
+        const nameError = document.getElementById('name-error');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreText = document.getElementById('score-text');
+        const scoreMessage = document.getElementById('score-message');
+        const resultsName = document.getElementById('results-name');
+        const leaderboardTableBody = document.querySelector('#leaderboard-table tbody');
+        const emailStatus = document.getElementById('email-status');
+
+        // Quiz State
+        let currentGroupIndex = 0;
+        let currentQuestionInGroupIndex = 0;
+        let overallQuestionIndex = 
